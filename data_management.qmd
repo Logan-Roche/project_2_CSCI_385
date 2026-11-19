@@ -1,0 +1,61 @@
+---
+title: "Project 02: Data Management"
+subtitle: "Where does a tech paycheck go the furthest?"
+author: "Logan Roche"
+format: pdf
+execute:
+  warning: false
+  message: false
+---
+
+## Setup
+
+- OEWS May 2025 metro file: <https://www.bls.gov/oes/special-requests/oesm25ma.zip>
+- BEA Regional Price Parities by metro: the `MARPP` zip from <https://apps.bea.gov/regional/downloadzip.htm>
+
+```{r}
+library(tidyverse)
+library(readxl)
+library(janitor)
+```
+
+## Import
+
+```{r}
+oews_raw <- read_excel("data/raw/oesm25ma/MSA_M2025_dl.xlsx") |> clean_names()
+rpp_raw  <- read_csv("data/raw/MARPP/MARPP_MSA_2008_2024.csv") |> clean_names()
+```
+
+## OEWS, May 2025 (metro areas, all occupations)
+
+```{r}
+glimpse(oews_raw)
+```
+
+## BEA Regional Price Parities (metro areas)
+
+```{r}
+glimpse(rpp_raw)
+```
+
+## Quick viability check
+
+How many metros actually report a median wage for software developers (SOC 15-1252)?
+
+```{r}
+oews_raw |>
+  filter(occ_code == "15-1252") |>
+  mutate(a_median_num = suppressWarnings(parse_number(as.character(a_median)))) |>
+  summarise(
+    metros_total       = n(),
+    metros_with_median = sum(!is.na(a_median_num)),
+    metros_top_coded   = sum(as.character(a_median) == "#", na.rm = TRUE)
+  )
+```
+
+Which RPP lines are in the BEA file? (Used later to pick the all-items and housing rows.)
+
+```{r}
+rpp_raw |>
+  distinct(line_code, description)
+```

@@ -48,3 +48,9 @@ po/*~
 
 # RStudio Connect folder
 rsconnect/
+
+# Random
+.DS_Store
+project_2_CSCI_385.Rproj
+data/
+
